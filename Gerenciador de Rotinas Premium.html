@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoutinePulse - Dashboard de Rotinas & Performance</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0a0d14',
+                            card: '#121824',
+                            hover: '#1a2234',
+                            border: '#1f293d',
+                            borderLight: '#2e3d5b'
+                        },
+                        accent: {
+                            indigo: '#6366f1',
+                            violet: '#8b5cf6',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e',
+                            cyan: '#06b6d4'
+                        }
+                    },
+                    boxShadow: {
+                        'glow-indigo': '0 0 25px -5px rgba(99, 102, 241, 0.35)',
+                        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.35)',
+                        'glow-violet': '0 0 25px -5px rgba(139, 92, 246, 0.35)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
+                    },
+                    animation: {
+                        'pulse-glow': 'pulseGlow 2s infinite alternate',
+                        'bounce-subtle': 'bounceSubtle 0.6s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards'
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%': { boxShadow: '0 0 15px -5px rgba(99, 102, 241, 0.3)' },
+                            '100%': { boxShadow: '0 0 30px 5px rgba(139, 92, 246, 0.5)' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.04)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(8px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fontes Google Inter & Outfits -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Canvas Confetti para celebações -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0d14;
+            color: #f1f5f9;
+        }
+        h1, h2, h3, h4, h5, .font-heading {
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        /* Glassmorphism custom classes */
+        .glass-panel {
+            background: rgba(18, 24, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .glass-panel-interactive {
+            background: rgba(18, 24, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-panel-interactive:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            background: rgba(26, 34, 52, 0.85);
+            transform: translateY(-2px);
+        }
+
+        /* Checkbox Customizado */
+        .custom-checkbox {
+            appearance: none;
+            background-color: rgba(15, 23, 42, 0.8);
+            border: 2px solid #334155;
+            border-radius: 8px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+        .custom-checkbox:checked::after {
+            content: '';
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) translate(-1px, -1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0d14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f293d;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2e3d5b;
+        }
+    </style>
+</head>
+<body class="min-h-full flex flex-col antialiased selection:bg-accent-violet selection:text-white pb-12">
+
+    <!-- EFEITO DE FUNDO / GRADIENT AMBIENTE -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-indigo-900/20 via-violet-900/10 to-transparent blur-3xl pointer-events-none z-0"></div>
+
+    <!-- NAVBAR NAVEGAÇÃO -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 shadow-glass">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+            
+            <!-- LOGO E DIA -->
+            <div class="flex items-center gap-3">
+                <div class="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-tr from-accent-indigo via-accent-violet to-accent-cyan p-0.5 shadow-glow-indigo">
+                    <div class="w-full h-full bg-dark-bg rounded-[14px] flex items-center justify-center">
+                        <i data-lucide="zap" class="w-5 h-5 text-accent-indigo"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        Routine<span class="text-accent-indigo">Pulse</span>
+                    </h1>
+                    <p id="current-date-text" class="text-xs text-slate-400 font-medium">Carregando data...</p>
+                </div>
+            </div>
+
+            <!-- NAVEGAÇÃO ENTRE ABAS -->
+            <nav class="hidden md:flex items-center gap-1.5 bg-dark-card/90 p-1.5 rounded-2xl border border-slate-800/80">
+                <button onclick="switchTab('gym')" id="tab-btn-gym" class="tab-button flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                    <i data-lucide="dumbbell" class="w-4 h-4"></i>
+                    <span>Academia</span>
+                </button>
+                <button onclick="switchTab('daily')" id="tab-btn-daily" class="tab-button flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                    <i data-lucide="check-square" class="w-4 h-4"></i>
+                    <span>Rotinas Diárias</span>
+                </button>
+                <button onclick="switchTab('history')" id="tab-btn-history" class="tab-button flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-400 hover:text-white">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <span>Histórico & Desempenho</span>
+                </button>
+            </nav>
+
+            <!-- AÇÕES DIREITAS (STREAK + BOTÃO NOVO) -->
+            <div class="flex items-center gap-3">
+                <!-- Badges de Foco / Streak -->
+                <div class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-xs font-bold" title="Dias consecutivos com rotinas concluídas">
+                    <i data-lucide="flame" class="w-4 h-4 fill-amber-400 text-amber-500"></i>
+                    <span id="streak-counter">0</span> <span class="hidden sm:inline">dias</span>
+                </div>
+
+                <button onclick="openModal()" class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-accent-indigo to-accent-violet hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-glow-indigo active:scale-95">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Nova Rotina</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- NAVEGAÇÃO MOBILE (BOTTOM OR ROW) -->
+        <div class="md:hidden flex border-t border-slate-800/80 px-2 py-1.5 bg-dark-bg/95 justify-around">
+            <button onclick="switchTab('gym')" id="mob-tab-gym" class="mob-tab-button flex flex-col items-center gap-1 py-1.5 px-3 text-xs font-medium text-slate-400">
+                <i data-lucide="dumbbell" class="w-4 h-4"></i>
+                <span>Academia</span>
+            </button>
+            <button onclick="switchTab('daily')" id="mob-tab-daily" class="mob-tab-button flex flex-col items-center gap-1 py-1.5 px-3 text-xs font-medium text-slate-400">
+                <i data-lucide="check-square" class="w-4 h-4"></i>
+                <span>Diárias</span>
+            </button>
+            <button onclick="switchTab('history')" id="mob-tab-history" class="mob-tab-button flex flex-col items-center gap-1 py-1.5 px-3 text-xs font-medium text-slate-400">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                <span>Histórico</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-8 space-y-8 z-10 relative flex-1">
+
+        <!-- DASHBOARD HERO - PROGRESSO DO DIA -->
+        <section id="hero-progress-section" class="glass-panel rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
+            <!-- Glow decorativo interno -->
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-accent-indigo/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <!-- Informações e Percentual -->
+                <div class="space-y-3 max-w-xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-indigo/10 border border-accent-indigo/20 text-accent-indigo text-xs font-semibold">
+                        <i data-lucide="target" class="w-3.5 h-3.5"></i>
+                        <span>Meta Diária de Performance</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                        Progresso de Hoje: <span id="hero-percentage-text" class="text-accent-emerald font-extrabold">0%</span>
+                    </h2>
+                    <p id="hero-motive-text" class="text-sm text-slate-400">
+                        Marque suas tarefas concluídas para impulsionar seu ritmo diário.
+                    </p>
+                </div>
+
+                <!-- Barra de Progresso Circular / Card Numérico -->
+                <div class="flex items-center gap-6 bg-dark-bg/60 p-4 rounded-2xl border border-slate-800/80 min-w-[260px] justify-between">
+                    <div class="space-y-1">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status Geral</span>
+                        <div class="flex items-baseline gap-1">
+                            <span id="hero-completed-count" class="text-3xl font-black text-white">0</span>
+                            <span id="hero-total-count" class="text-sm font-semibold text-slate-500">/ 0 tarefas</span>
+                        </div>
+                    </div>
+
+                    <!-- Progresso Circular SVG -->
+                    <div class="relative flex items-center justify-center w-16 h-16">
+                        <svg class="w-16 h-16 transform -rotate-90">
+                            <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="5" class="text-slate-800" fill="transparent" />
+                            <circle id="progress-circle-bar" cx="32" cy="32" r="26" stroke="currentColor" stroke-width="5" class="text-accent-emerald transition-all duration-700 ease-out" stroke-dasharray="163.3" stroke-dashoffset="163.3" stroke-linecap="round" fill="transparent" />
+                        </svg>
+                        <i data-lucide="trophy" class="w-5 h-5 text-accent-emerald absolute"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra Linear Dupla Secundária -->
+            <div class="mt-6 pt-5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="dumbbell" class="w-3.5 h-3.5 text-accent-amber"></i> Academia</span>
+                        <span id="gym-prog-text" class="text-amber-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div id="gym-prog-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-400 flex items-center gap-1.5"><i data-lucide="check-square" class="w-3.5 h-3.5 text-accent-cyan"></i> Rotinas Diárias</span>
+                        <span id="daily-prog-text" class="text-cyan-400">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div id="daily-prog-bar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISUALIZAÇÃO PRINCIPAL (ABAS DE ACADEMIA E ROTINAS) -->
+        <section id="routine-main-view" class="space-y-6">
+            
+            <!-- CABEÇALHO DA LISTA E FILTROS -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
+                <div>
+                    <h3 id="current-tab-title" class="text-2xl font-bold text-white flex items-center gap-2">
+                        <!-- Título Dinâmico -->
+                    </h3>
+                    <p id="current-tab-subtitle" class="text-sm text-slate-400">Gerencie seus compromissos e mantenha a consistência.</p>
+                </div>
+
+                <!-- Filtro por Categoria/Grupo -->
+                <div class="flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+                    <select id="category-filter" onchange="renderTaskList()" class="bg-dark-card border border-slate-800 text-slate-200 text-xs font-medium rounded-xl px-3 py-2 focus:ring-2 focus:ring-accent-indigo focus:outline-none">
+                        <option value="ALL">Todas as Categorias</option>
+                        <!-- Inserido dinamicamente -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- CONTAINER DA LISTA DE TAREFAS -->
+            <div id="task-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Cards de Tarefas via JS -->
+            </div>
+        </section>
+
+        <!-- VISUALIZAÇÃO DE HISTÓRICO & DESEMPENHO -->
+        <section id="history-main-view" class="hidden space-y-8 animate-fade-in">
+            
+            <!-- CONTROLES DE HISTÓRICO E SELETOR DE DATA -->
+            <div class="glass-panel p-6 rounded-3xl space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i data-lucide="calendar" class="w-5 h-5 text-accent-violet"></i>
+                            Consulta de Dias Anteriores
+                        </h3>
+                        <p class="text-sm text-slate-400">Escolha uma data para visualizar os registros de conquistas passadas.</p>
+                    </div>
+
+                    <!-- Seletor de Data Estilizado -->
+                    <div class="flex items-center gap-3 bg-dark-bg p-2 rounded-2xl border border-slate-800">
+                        <label for="history-date-picker" class="text-xs font-semibold text-slate-400 pl-2">Data:</label>
+                        <input type="date" id="history-date-picker" onchange="renderHistoryForSelectedDate()" class="bg-dark-card border border-slate-700 text-white text-sm font-medium rounded-xl px-3 py-2 focus:ring-2 focus:ring-accent-indigo focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- CARDS RESUMO DO DIA SELECIONADO -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800/80">
+                    <div class="bg-dark-bg/60 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase">Total Concluídos</span>
+                            <p id="hist-total-num" class="text-2xl font-black text-accent-emerald mt-1">0</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-accent-emerald">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark-bg/60 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase">Treinos Realizados</span>
+                            <p id="hist-gym-num" class="text-2xl font-black text-accent-amber mt-1">0</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-accent-amber">
+                            <i data-lucide="dumbbell" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-dark-bg/60 p-4 rounded-2xl border border-slate-800/80 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase">Hábitos Diários</span>
+                            <p id="hist-daily-num" class="text-2xl font-black text-accent-cyan mt-1">0</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center text-accent-cyan">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DETALHAMENTO DE CONQUISTAS DA DATA -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Academia Histórico -->
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <h4 class="font-bold text-amber-400 flex items-center gap-2">
+                            <i data-lucide="dumbbell" class="w-4 h-4"></i> Academia Concluídos
+                        </h4>
+                        <span id="hist-gym-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">0 itens</span>
+                    </div>
+                    <div id="hist-gym-container" class="space-y-2.5">
+                        <!-- JS Insert -->
+                    </div>
+                </div>
+
+                <!-- Diárias Histórico -->
+                <div class="glass-panel p-6 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <h4 class="font-bold text-cyan-400 flex items-center gap-2">
+                            <i data-lucide="check-square" class="w-4 h-4"></i> Hábitos Concluídos
+                        </h4>
+                        <span id="hist-daily-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">0 itens</span>
+                    </div>
+                    <div id="hist-daily-container" class="space-y-2.5">
+                        <!-- JS Insert -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAPA VISUAL DE DESEMPENHO (ÚLTIMOS 7 DIAS) -->
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <h4 class="font-bold text-slate-200 flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-accent-indigo"></i> Ritmo dos Últimos 7 Dias
+                </h4>
+                <div id="last-7-days-grid" class="grid grid-cols-7 gap-2 pt-2">
+                    <!-- Cards dos 7 dias via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL DE CRIAR/EDITAR ROTINA -->
+    <div id="task-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden transition-all duration-300">
+        <div class="glass-panel bg-dark-card border border-slate-800 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-6 transform scale-95 opacity-0 transition-all duration-200" id="modal-content">
+            
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-accent-indigo/10 border border-accent-indigo/20 rounded-2xl text-accent-indigo">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 id="modal-title-text" class="text-xl font-bold text-white">Nova Rotina</h3>
+                        <p class="text-xs text-slate-400">Preencha os detalhes do seu compromisso</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-2 rounded-xl bg-dark-bg border border-slate-800 transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form id="task-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="task-id">
+
+                <!-- TIPO DA ROTINA -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Aba / Categoria Principal</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="task-type" value="gym" id="type-gym" class="peer hidden" checked>
+                            <div class="flex items-center justify-center gap-2 p-3 rounded-2xl border border-slate-800 bg-dark-bg peer-checked:border-accent-amber peer-checked:bg-amber-500/10 peer-checked:text-amber-400 text-slate-400 font-semibold text-sm transition-all">
+                                <i data-lucide="dumbbell" class="w-4 h-4"></i> Academia
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="task-type" value="daily" id="type-daily" class="peer hidden">
+                            <div class="flex items-center justify-center gap-2 p-3 rounded-2xl border border-slate-800 bg-dark-bg peer-checked:border-accent-cyan peer-checked:bg-cyan-500/10 peer-checked:text-cyan-400 text-slate-400 font-semibold text-sm transition-all">
+                                <i data-lucide="check-square" class="w-4 h-4"></i> Rotina Diária
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- TÍTULO -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Título / Exercício *</label>
+                    <input type="text" id="task-title" required placeholder="Ex: Leg Press 45º ou Meditação 10 min" class="w-full bg-dark-bg border border-slate-800 text-white rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent-indigo focus:border-transparent focus:outline-none transition-all">
+                </div>
+
+                <!-- GRUPO / SUB-CATEGORIA -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Grupo / Categoria</label>
+                        <input type="text" id="task-category" placeholder="Ex: Quadríceps, Manhã, Estudo" class="w-full bg-dark-bg border border-slate-800 text-white rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent-indigo focus:border-transparent focus:outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Horário / Frequência</label>
+                        <input type="text" id="task-schedule" placeholder="Ex: 07:30 / 4x12 reps" class="w-full bg-dark-bg border border-slate-800 text-white rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent-indigo focus:border-transparent focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- NOTAS / CARGA -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Observações / Carga</label>
+                    <textarea id="task-notes" rows="2" placeholder="Ex: Carga inicial 80kg, focar em cadência lenta..." class="w-full bg-dark-bg border border-slate-800 text-white rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-accent-indigo focus:border-transparent focus:outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <!-- BOTOES MODAL -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-800/80">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-2xl bg-dark-bg hover:bg-slate-800 text-slate-300 font-semibold text-sm transition-all border border-slate-800">Cancelar</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-accent-indigo to-accent-violet hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-sm transition-all shadow-glow-indigo">Salvar Rotina</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICAÇÃO TOAST ELEGANTE -->
+    <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 glass-panel bg-dark-card border border-slate-700/80 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3">
+        <div id="toast-icon-bg" class="p-2 rounded-xl bg-emerald-500/20 text-accent-emerald">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <p id="toast-title" class="text-xs text-slate-400 font-medium">Notificação</p>
+            <p id="toast-message" class="text-sm font-semibold text-slate-100">Operação concluída</p>
+        </div>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT COMPLETA -->
+    <script>
+        // --- ESTADO GLOBAL DA APLICAÇÃO ---
+        let currentTab = 'gym'; // 'gym', 'daily', 'history'
+        let tasks = [];
+        let historyLogs = {}; // Formato: { "YYYY-MM-DD": [ "id1", "id2" ] }
+        let streak = 0;
+
+        // --- INICIALIZAÇÃO DA PÁGINA ---
+        window.onload = function() {
+            lucide.createIcons();
+            updateCurrentDateHeader();
+            loadLocalStorage();
+            
+            // Caso não existam dados salvos, gera alguns de demonstração
+            if (tasks.length === 0) {
+                seedDemoData();
+            }
+
+            calculateStreak();
+            
+            // Define o input de histórico para o dia de hoje
+            document.getElementById('history-date-picker').value = getTodayDateString();
+
+            switchTab('gym');
+        };
+
+        // Formata a data atual em extenso
+        function updateCurrentDateHeader() {
+            const now = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            const formatted = now.toLocaleDateString('pt-BR', options);
+            document.getElementById('current-date-text').innerText = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // --- ARMAZENAMENTO LOCAL (LOCALSTORAGE) ---
+        function loadLocalStorage() {
+            try {
+                const storedTasks = localStorage.getItem('routine_pulse_tasks');
+                const storedLogs = localStorage.getItem('routine_pulse_history');
+                
+                if (storedTasks) tasks = JSON.parse(storedTasks);
+                if (storedLogs) historyLogs = JSON.parse(storedLogs);
+            } catch (err) {
+                console.error("Erro ao carregar do LocalStorage:", err);
+            }
+        }
+
+        function saveLocalStorage() {
+            try {
+                localStorage.setItem('routine_pulse_tasks', JSON.stringify(tasks));
+                localStorage.setItem('routine_pulse_history', JSON.stringify(historyLogs));
+            } catch (err) {
+                console.error("Erro ao salvar no LocalStorage:", err);
+            }
+            updateHeroProgress();
+            calculateStreak();
+        }
+
+        // Dados de demonstração inicial
+        function seedDemoData() {
+            tasks = [
+                { id: 't1', type: 'gym', title: 'Agachamento Livre', category: 'Pernas', schedule: '4x10 (80kg)', notes: 'Focar na amplitude e postura', completed: false },
+                { id: 't2', type: 'gym', title: 'Leg Press 45º', category: 'Pernas', schedule: '3x12 (160kg)', notes: 'Pausa de 2s na descida', completed: false },
+                { id: 't3', type: 'gym', title: 'Stiff com Halteres', category: 'Posterior', schedule: '4x12 (22kg/lado)', notes: 'Manter coluna alinhada', completed: false },
+                { id: 't4', type: 'daily', title: 'Meditação Guiada', category: 'Mente', schedule: '07:00 AM', notes: '10 minutos de respiração consciente', completed: false },
+                { id: 't5', type: 'daily', title: 'Beber 3 Litros de Água', category: 'Saúde', schedule: 'Ao longo do dia', notes: 'Utilizar a garrafa de 1L', completed: false },
+                { id: 't6', type: 'daily', title: 'Leitura de Livro', category: 'Desenvolvimento', schedule: '22:00 PM', notes: 'Ler pelo menos 15 páginas', completed: false }
+            ];
+            saveLocalStorage();
+        }
+
+        // --- ALTERNÂNCIA DE ABAS ---
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Estilização das abas desktop
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('bg-gradient-to-r', 'from-accent-indigo', 'to-accent-violet', 'text-white', 'shadow-glow-indigo');
+                btn.classList.add('text-slate-400');
+            });
+
+            // Estilização das abas mobile
+            document.querySelectorAll('.mob-tab-button').forEach(btn => {
+                btn.classList.remove('text-accent-indigo');
+                btn.classList.add('text-slate-400');
+            });
+
+            const activeTabBtn = document.getElementById(`tab-btn-${tab}`);
+            if (activeTabBtn) {
+                activeTabBtn.classList.add('bg-gradient-to-r', 'from-accent-indigo', 'to-accent-violet', 'text-white', 'shadow-glow-indigo');
+                activeTabBtn.classList.remove('text-slate-400');
+            }
+
+            const activeMobTabBtn = document.getElementById(`mob-tab-${tab}`);
+            if (activeMobTabBtn) {
+                activeMobTabBtn.classList.add('text-accent-indigo');
+                activeMobTabBtn.classList.remove('text-slate-400');
+            }
+
+            // Alternar Views
+            const mainRoutineView = document.getElementById('routine-main-view');
+            const historyView = document.getElementById('history-main-view');
+
+            if (tab === 'history') {
+                mainRoutineView.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                renderHistoryForSelectedDate();
+                renderLast7DaysGrid();
+            } else {
+                mainRoutineView.classList.remove('hidden');
+                historyView.classList.add('hidden');
+
+                // Atualizar Títulos da Lista
+                const titleEl = document.getElementById('current-tab-title');
+                const subTitleEl = document.getElementById('current-tab-subtitle');
+
+                if (tab === 'gym') {
+                    titleEl.innerHTML = `<i data-lucide="dumbbell" class="w-6 h-6 text-accent-amber"></i> Ficha de Treinos & Exercícios`;
+                    subTitleEl.innerText = 'Monitore suas séries, execução e cargas do dia.';
+                } else {
+                    titleEl.innerHTML = `<i data-lucide="check-square" class="w-6 h-6 text-accent-cyan"></i> Hábitos & Rotinas Diárias`;
+                    subTitleEl.innerText = 'Cumpra suas metas pessoais, bem-estar e produtividade.';
+                }
+
+                populateCategoryFilter();
+                renderTaskList();
+            }
+
+            lucide.createIcons();
+        }
+
+        // --- POPULAR FILTRO DE CATEGORIAS ---
+        function populateCategoryFilter() {
+            const select = document.getElementById('category-filter');
+            select.innerHTML = '<option value="ALL">Todas as Categorias</option>';
+
+            const categories = [...new Set(tasks.filter(t => t.type === currentTab && t.category).map(t => t.category))];
+            
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        // --- RENDERIZAR LISTA DE TAREFAS DA ABA ATIVA ---
+        function renderTaskList() {
+            const container = document.getElementById('task-cards-container');
+            container.innerHTML = '';
+
+            const selectedCat = document.getElementById('category-filter').value;
+
+            const filteredTasks = tasks.filter(t => {
+                const matchTab = t.type === currentTab;
+                const matchCat = selectedCat === 'ALL' || t.category === selectedCat;
+                return matchTab && matchCat;
+            });
+
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-16 text-center glass-panel rounded-3xl border border-dashed border-slate-800 space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500">
+                            <i data-lucide="inbox" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-slate-300 font-semibold">Nenhuma rotina cadastrada para esta visualização.</p>
+                        <p class="text-xs text-slate-500">Clique em "Nova Rotina" no topo para adicionar seus compromissos.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                updateHeroProgress();
+                return;
+            }
+
+            filteredTasks.forEach(task => {
+                const isGym = task.type === 'gym';
+                const card = document.createElement('div');
+                card.className = `glass-panel-interactive p-5 rounded-2xl flex items-start justify-between gap-4 relative overflow-hidden ${
+                    task.completed ? 'opacity-65 bg-slate-950/40' : ''
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-4 flex-1 min-w-0">
+                        <!-- Custom Checkbox -->
+                        <div class="pt-0.5">
+                            <input 
+                                type="checkbox" 
+                                class="custom-checkbox" 
+                                ${task.completed ? 'checked' : ''} 
+                                onchange="toggleTaskStatus('${task.id}')"
+                            >
+                        </div>
+
+                        <!-- Conteúdo da Tarefa -->
+                        <div class="space-y-1.5 flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="font-bold text-slate-100 text-base ${task.completed ? 'line-through text-slate-400' : ''} truncate">
+                                    ${escapeHtml(task.title)}
+                                </h4>
+                                ${task.category ? `
+                                    <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-md border ${
+                                        isGym 
+                                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' 
+                                        : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                                    }">
+                                        ${escapeHtml(task.category)}
+                                    </span>
+                                ` : ''}
+                            </div>
+
+                            ${task.schedule ? `
+                                <div class="flex items-center gap-1.5 text-xs font-semibold ${isGym ? 'text-amber-400/90' : 'text-cyan-400/90'}">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                    <span>${escapeHtml(task.schedule)}</span>
+                                </div>
+                            ` : ''}
+
+                            ${task.notes ? `
+                                <p class="text-xs text-slate-400 bg-dark-bg/80 p-2.5 rounded-xl border border-slate-800/80 mt-2">
+                                    ${escapeHtml(task.notes)}
+                                </p>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Menu de Ações (Editar / Excluir) -->
+                    <div class="flex items-center gap-1">
+                        <button onclick="openModal('${task.id}')" class="p-2 text-slate-400 hover:text-accent-indigo hover:bg-slate-800 rounded-xl transition-all" title="Editar">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deleteTask('${task.id}')" class="p-2 text-slate-400 hover:text-accent-rose hover:bg-slate-800 rounded-xl transition-all" title="Excluir">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+            updateHeroProgress();
+        }
+
+        // --- ALTERAR STATUS DE CONCLUSÃO ---
+        function toggleTaskStatus(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            task.completed = !task.completed;
+            const today = getTodayDateString();
+
+            if (!historyLogs[today]) {
+                historyLogs[today] = [];
+            }
+
+            if (task.completed) {
+                if (!historyLogs[today].includes(id)) {
+                    historyLogs[today].push(id);
+                }
+                showToast('Parabéns!', `"${task.title}" marcada como concluída.`);
+            } else {
+                historyLogs[today] = historyLogs[today].filter(itemId => itemId !== id);
+                showToast('Status Atualizado', `"${task.title}" desmarcada.`);
+            }
+
+            saveLocalStorage();
+            renderTaskList();
+            checkAndTriggerConfetti();
+        }
+
+        // --- DISPARO DE CONFETI QUANDO ATINGIR 100% NO DIA ---
+        function checkAndTriggerConfetti() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+
+            if (total > 0 && completed === total) {
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#6366f1', '#10b981', '#f59e0b', '#8b5cf6']
+                });
+                showToast('100% Concluído! 🔥', 'Sua meta diária foi completamente alcançada!', 'emerald');
+            }
+        }
+
+        // --- ATUALIZAR HERO PROGRESS & BARRAS ---
+        function updateHeroProgress() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(t => t.completed).length;
+
+            const percentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+
+            // Elementos gerais
+            document.getElementById('hero-percentage-text').innerText = `${percentage}%`;
+            document.getElementById('hero-completed-count').innerText = completedTasks;
+            document.getElementById('hero-total-count').innerText = `/ ${totalTasks} tarefas`;
+
+            // Círculo SVG de progresso (circunferência = ~163.3)
+            const circleBar = document.getElementById('progress-circle-bar');
+            const circumference = 163.3;
+            const offset = circumference - (percentage / 100) * circumference;
+            circleBar.style.strokeDashoffset = offset;
+
+            // Frase Motivacional
+            const motiveText = document.getElementById('hero-motive-text');
+            if (percentage === 100) {
+                motiveText.innerText = 'Sensacional! Você atingiu 100% de performance hoje!';
+            } else if (percentage >= 50) {
+                motiveText.innerText = 'Excelente ritmo! Você já passou da metade da sua meta.';
+            } else if (percentage > 0) {
+                motiveText.innerText = 'Bom começo! Mantenha o foco para completar suas rotinas.';
+            } else {
+                motiveText.innerText = 'Marque suas tarefas concluídas para impulsionar seu ritmo diário.';
+            }
+
+            // Progresso individual por categoria
+            const gymTasks = tasks.filter(t => t.type === 'gym');
+            const gymCompleted = gymTasks.filter(t => t.completed).length;
+            const gymPct = gymTasks.length === 0 ? 0 : Math.round((gymCompleted / gymTasks.length) * 100);
+            document.getElementById('gym-prog-text').innerText = `${gymPct}%`;
+            document.getElementById('gym-prog-bar').style.width = `${gymPct}%`;
+
+            const dailyTasks = tasks.filter(t => t.type === 'daily');
+            const dailyCompleted = dailyTasks.filter(t => t.completed).length;
+            const dailyPct = dailyTasks.length === 0 ? 0 : Math.round((dailyCompleted / dailyTasks.length) * 100);
+            document.getElementById('daily-prog-text').innerText = `${dailyPct}%`;
+            document.getElementById('daily-prog-bar').style.width = `${dailyPct}%`;
+        }
+
+        // --- CÁLCULO DE STREAK (DIAS CONSECUTIVOS) ---
+        function calculateStreak() {
+            let currentStreak = 0;
+            const today = new Date();
+
+            for (let i = 0; i < 365; i++) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+
+                const logsForDate = historyLogs[dateStr] || [];
+                if (logsForDate.length > 0) {
+                    currentStreak++;
+                } else if (i > 0) { // Se for o dia de hoje ainda sem tarefas, não quebra
+                    break;
+                }
+            }
+
+            streak = currentStreak;
+            document.getElementById('streak-counter').innerText = streak;
+        }
+
+        // --- MODAL DE CRIAÇÃO / EDIÇÃO ---
+        function openModal(id = null) {
+            const modal = document.getElementById('task-modal');
+            const content = document.getElementById('modal-content');
+            const form = document.getElementById('task-form');
+            form.reset();
+
+            if (id) {
+                const task = tasks.find(t => t.id === id);
+                if (task) {
+                    document.getElementById('modal-title-text').innerText = 'Editar Rotina';
+                    document.getElementById('task-id').value = task.id;
+                    document.getElementById('task-title').value = task.title;
+                    document.getElementById('task-category').value = task.category || '';
+                    document.getElementById('task-schedule').value = task.schedule || '';
+                    document.getElementById('task-notes').value = task.notes || '';
+
+                    if (task.type === 'gym') {
+                        document.getElementById('type-gym').checked = true;
+                    } else {
+                        document.getElementById('type-daily').checked = true;
+                    }
+                }
+            } else {
+                document.getElementById('modal-title-text').innerText = 'Nova Rotina';
+                document.getElementById('task-id').value = '';
+                
+                if (currentTab === 'daily') {
+                    document.getElementById('type-daily').checked = true;
+                } else {
+                    document.getElementById('type-gym').checked = true;
+                }
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('task-modal');
+            const content = document.getElementById('modal-content');
+
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('task-id').value;
+            const title = document.getElementById('task-title').value.trim();
+            const category = document.getElementById('task-category').value.trim();
+            const schedule = document.getElementById('task-schedule').value.trim();
+            const notes = document.getElementById('task-notes').value.trim();
+            
+            const typeRadio = document.querySelector('input[name="task-type"]:checked');
+            const type = typeRadio ? typeRadio.value : 'gym';
+
+            if (!title) return;
+
+            if (id) {
+                // Atualizar
+                const idx = tasks.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    tasks[idx] = { ...tasks[idx], type, title, category, schedule, notes };
+                    showToast('Rotina Atualizada', 'As alterações foram salvas com sucesso.');
+                }
+            } else {
+                // Novo
+                const newTask = {
+                    id: 'task_' + Date.now(),
+                    type,
+                    title,
+                    category,
+                    schedule,
+                    notes,
+                    completed: false
+                };
+                tasks.push(newTask);
+                showToast('Rotina Criada', 'Sua nova rotina já está pronta para acompanhamento.');
+            }
+
+            saveLocalStorage();
+            closeModal();
+
+            if (currentTab !== type && currentTab !== 'history') {
+                switchTab(type);
+            } else {
+                populateCategoryFilter();
+                renderTaskList();
+            }
+        }
+
+        function deleteTask(id) {
+            if (confirm('Deseja realmente remover esta rotina?')) {
+                tasks = tasks.filter(t => t.id !== id);
+
+                // Remover entradas dos históricos
+                Object.keys(historyLogs).forEach(dateStr => {
+                    historyLogs[dateStr] = historyLogs[dateStr].filter(taskId => taskId !== id);
+                });
+
+                saveLocalStorage();
+                populateCategoryFilter();
+                renderTaskList();
+                showToast('Rotina Removida', 'O item foi excluído do seu painel.', 'rose');
+            }
+        }
+
+        // --- RENDERIZAR ABA DE HISTÓRICO ---
+        function renderHistoryForSelectedDate() {
+            const dateVal = document.getElementById('history-date-picker').value;
+            const completedIds = historyLogs[dateVal] || [];
+
+            // Buscar instâncias das tarefas concluídas
+            const completedTasks = tasks.filter(t => completedIds.includes(t.id));
+
+            const gymTasks = completedTasks.filter(t => t.type === 'gym');
+            const dailyTasks = completedTasks.filter(t => t.type === 'daily');
+
+            // Atualizar contadores
+            document.getElementById('hist-total-num').innerText = completedTasks.length;
+            document.getElementById('hist-gym-num').innerText = gymTasks.length;
+            document.getElementById('hist-daily-num').innerText = dailyTasks.length;
+
+            document.getElementById('hist-gym-badge').innerText = `${gymTasks.length} itens`;
+            document.getElementById('hist-daily-badge').innerText = `${dailyTasks.length} itens`;
+
+            // Renderizar Gym
+            const gymContainer = document.getElementById('hist-gym-container');
+            gymContainer.innerHTML = '';
+            if (gymTasks.length === 0) {
+                gymContainer.innerHTML = `<p class="text-xs text-slate-500 italic p-3 bg-dark-bg/60 rounded-2xl border border-slate-800">Nenhum treino registrado nesta data.</p>`;
+            } else {
+                gymTasks.forEach(task => {
+                    gymContainer.appendChild(createHistoryCard(task, 'amber'));
+                });
+            }
+
+            // Renderizar Diárias
+            const dailyContainer = document.getElementById('hist-daily-container');
+            dailyContainer.innerHTML = '';
+            if (dailyTasks.length === 0) {
+                dailyContainer.innerHTML = `<p class="text-xs text-slate-500 italic p-3 bg-dark-bg/60 rounded-2xl border border-slate-800">Nenhum hábito concluído nesta data.</p>`;
+            } else {
+                dailyTasks.forEach(task => {
+                    dailyContainer.appendChild(createHistoryCard(task, 'cyan'));
+                });
+            }
+
+            lucide.createIcons();
+        }
+
+        function createHistoryCard(task, color) {
+            const card = document.createElement('div');
+            card.className = 'bg-dark-bg/80 border border-slate-800/80 p-3.5 rounded-2xl flex items-center justify-between text-xs';
+            card.innerHTML = `
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-7 h-7 rounded-xl bg-${color}-500/10 text-accent-${color} flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    </div>
+                    <div class="truncate">
+                        <span class="font-bold text-slate-200 block truncate text-sm">${escapeHtml(task.title)}</span>
+                        ${task.category ? `<span class="text-[10px] text-slate-400">${escapeHtml(task.category)}</span>` : ''}
+                    </div>
+                </div>
+                ${task.schedule ? `<span class="text-[11px] font-semibold text-slate-400 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800">${escapeHtml(task.schedule)}</span>` : ''}
+            `;
+            return card;
+        }
+
+        // --- MAPA DOS ÚLTIMOS 7 DIAS ---
+        function renderLast7DaysGrid() {
+            const grid = document.getElementById('last-7-days-grid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                const dayName = d.toLocaleDateString('pt-BR', { weekday: 'short' }).substring(0, 3).toUpperCase();
+                const dayNum = d.getDate();
+
+                const logs = historyLogs[dateStr] || [];
+                const hasLogs = logs.length > 0;
+
+                const dayCard = document.createElement('div');
+                dayCard.onclick = () => {
+                    document.getElementById('history-date-picker').value = dateStr;
+                    renderHistoryForSelectedDate();
+                };
+                
+                dayCard.className = `cursor-pointer p-3 rounded-2xl border text-center transition-all duration-200 ${
+                    hasLogs 
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-accent-emerald hover:border-emerald-500' 
+                    : 'bg-dark-bg border-slate-800 text-slate-500 hover:border-slate-700'
+                }`;
+
+                dayCard.innerHTML = `
+                    <span class="text-[10px] font-bold block opacity-70">${dayName}</span>
+                    <span class="text-base font-extrabold block mt-0.5">${dayNum}</span>
+                    <div class="mt-1.5 flex justify-center">
+                        <div class="w-2 h-2 rounded-full ${hasLogs ? 'bg-accent-emerald shadow-glow-emerald' : 'bg-slate-800'}"></div>
+                    </div>
+                `;
+
+                grid.appendChild(dayCard);
+            }
+        }
+
+        // --- NOTIFICAÇÃO TOAST ---
+        function showToast(title, message, iconType = 'indigo') {
+            const toast = document.getElementById('toast-notification');
+            document.getElementById('toast-title').innerText = title;
+            document.getElementById('toast-message').innerText = message;
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
